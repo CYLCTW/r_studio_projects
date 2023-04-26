@@ -46,16 +46,20 @@
 
 ## Другой атакующий установил автоматическую задачу в системном планировщике cron для экспорта содержимого внутренней wiki системы. Эта система генерирует большое количество траффика в нерабочие часы, больше чем остальные хосты. Определите IP этой системы. Известно, что ее IP адрес отличается от нарушителя из предыдущей задачи.
 
+    Sys.setlocale("LC_TIME", "Russian")
+
+    ## [1] "Russian_Russia.1251"
+
     dataset %>%
-      select(timestamp, src, dst, bytes) %>%
-      mutate(outside_traffic = (str_detect(src,"^((12|13|14)\\.)") & !str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as_datetime(timestamp/1000))) %>%
-      filter(outside_traffic == TRUE, hour >= 0 & hour <= 15) %>%
-      group_by(src) %>%
-      summarise(total_bytes = sum(bytes)) %>%
-      arrange(desc(total_bytes))  %>%
-      head(1)
+    select(timestamp, src, dst, bytes) %>%
+    mutate(outside_traffic = !(!str_detect(src,"^((12|13|14)\\.)")&str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as.POSIXlt(timestamp/1000, origin = "1970-01-01"))) %>%
+    filter(outside_traffic == FALSE, hour < 8 | hour > 17) %>%
+    group_by(src) %>%
+    summarise(total_bytes = sum(bytes)) %>%
+    arrange(desc(total_bytes))  %>%
+    head(1)
 
     ## # A tibble: 1 × 2
-    ##   src          total_bytes
-    ##   <chr>              <int>
-    ## 1 13.37.84.125   731158032
+    ##   src           total_bytes
+    ##   <chr>               <int>
+    ## 1 18.123.106.55   904203418
