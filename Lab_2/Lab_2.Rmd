@@ -1,0 +1,38 @@
+---
+title: "Lab2"
+output: md_document
+date: "2023-03-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Подключение нужных пакетов
+
+```{r}
+library(arrow)
+library(dplyr)
+library(stringr)
+library(lubridate)
+library(ggplot2)
+```
+### Импорт датасета
+
+```{r,warning=FALSE, message=FALSE, error=FALSE}
+dataset <- arrow::read_csv_arrow("D:\\Lab_RStudio\\gowiththeflow_20190826\\gowiththeflow_20190826.csv",schema = schema(timestamp=int64(),src=utf8(),dst=utf8(),port=uint32(),bytes=uint32()))
+```
+# Задание 2: Надите утечку данных 2
+
+## Другой атакующий установил автоматическую задачу в системном планировщике cron для экспорта содержимого внутренней wiki системы. Эта система генерирует большое количество траффика в нерабочие часы, больше чем остальные хосты. Определите IP этой системы. Известно, что ее IP адрес отличается от нарушителя из предыдущей задачи.
+
+```{r, warning=FALSE, message=FALSE, error=FALSE}
+dataset %>%
+  select(timestamp, src, dst, bytes) %>%
+  mutate(outside_traffic = (str_detect(src,"^((12|13|14)\\.)") & !str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as_datetime(timestamp/1000))) %>%
+  filter(outside_traffic == TRUE, hour >= 0 & hour <= 15) %>%
+  group_by(src) %>%
+  summarise(total_bytes = sum(bytes)) %>%
+  arrange(desc(total_bytes))  %>%
+  head(1)
+```

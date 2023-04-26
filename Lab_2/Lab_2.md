@@ -1,0 +1,61 @@
+### Подключение нужных пакетов
+
+    library(arrow)
+
+    ## 
+    ## Присоединяю пакет: 'arrow'
+
+    ## Следующий объект скрыт от 'package:utils':
+    ## 
+    ##     timestamp
+
+    library(dplyr)
+
+    ## 
+    ## Присоединяю пакет: 'dplyr'
+
+    ## Следующие объекты скрыты от 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## Следующие объекты скрыты от 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+    library(stringr)
+    library(lubridate)
+
+    ## 
+    ## Присоединяю пакет: 'lubridate'
+
+    ## Следующий объект скрыт от 'package:arrow':
+    ## 
+    ##     duration
+
+    ## Следующие объекты скрыты от 'package:base':
+    ## 
+    ##     date, intersect, setdiff, union
+
+    library(ggplot2)
+
+### Импорт датасета
+
+    dataset <- arrow::read_csv_arrow("D:\\Lab_RStudio\\gowiththeflow_20190826\\gowiththeflow_20190826.csv",schema = schema(timestamp=int64(),src=utf8(),dst=utf8(),port=uint32(),bytes=uint32()))
+
+# Задание 2: Надите утечку данных 2
+
+## Другой атакующий установил автоматическую задачу в системном планировщике cron для экспорта содержимого внутренней wiki системы. Эта система генерирует большое количество траффика в нерабочие часы, больше чем остальные хосты. Определите IP этой системы. Известно, что ее IP адрес отличается от нарушителя из предыдущей задачи.
+
+    dataset %>%
+      select(timestamp, src, dst, bytes) %>%
+      mutate(outside_traffic = (str_detect(src,"^((12|13|14)\\.)") & !str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as_datetime(timestamp/1000))) %>%
+      filter(outside_traffic == TRUE, hour >= 0 & hour <= 15) %>%
+      group_by(src) %>%
+      summarise(total_bytes = sum(bytes)) %>%
+      arrange(desc(total_bytes))  %>%
+      head(1)
+
+    ## # A tibble: 1 × 2
+    ##   src          total_bytes
+    ##   <chr>              <int>
+    ## 1 13.37.84.125   731158032
