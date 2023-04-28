@@ -30,10 +30,10 @@ dataset <- arrow::read_csv_arrow("D:\\Lab_RStudio\\gowiththeflow_20190826\\gowit
 Sys.setlocale("LC_TIME", "Russian")
 dataset %>%
 select(timestamp, src, dst, bytes) %>%
-mutate(outside_traffic = !(!str_detect(src,"^((12|13|14)\\.)")&str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as.POSIXlt(timestamp/1000, origin = "1970-01-01"))) %>%
-filter(outside_traffic == FALSE, hour < 8 | hour > 17) %>%
+mutate(outside_traffic = (!str_detect(src,"^((12|13|14)\\.)")&str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as.POSIXlt(timestamp/1000, origin = "1970-01-01"))) %>%
+filter(outside_traffic == TRUE, hour < 8 | hour > 17) %>%
 group_by(src) %>%
 summarise(total_bytes = sum(bytes)) %>%
 arrange(desc(total_bytes))  %>%
-head(1)
+head(10)
 ```
