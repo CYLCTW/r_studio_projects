@@ -1,5 +1,5 @@
 ---
-title: "Lab2"
+title: "Lab2 "
 output: md_document
 date: "2023-03-01"
 ---
