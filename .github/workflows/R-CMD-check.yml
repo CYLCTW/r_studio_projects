@@ -1,0 +1,22 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+on:[push,pull_request]
+name: R-CMD-check
+
+jobs:
+  R-CMD-check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: r-lib/actions/setup-r@f57f1301a053485946083d7a45022b278929a78a
+      - name: Install dependencies
+        run: Rscript -e "install.packages(c('remotes','rcmdcheck'))" -e "remotes::install_deps(dependencies = TRUE)"
+      - name: Check
+        run: Rscript -e "rcmdcheck::rcmdcheck(args = '--no-manual',error_on = 'error')"
+        
