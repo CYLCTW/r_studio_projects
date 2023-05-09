@@ -26,14 +26,24 @@ dataset <- arrow::read_csv_arrow("D:\\Lab_RStudio\\gowiththeflow_20190826\\gowit
 
 ## Другой атакующий установил автоматическую задачу в системном планировщике cron для экспорта содержимого внутренней wiki системы. Эта система генерирует большое количество траффика в нерабочие часы, больше чем остальные хосты. Определите IP этой системы. Известно, что ее IP адрес отличается от нарушителя из предыдущей задачи.
 
+### Построив графики распределения количества пакетов и данных за каждый час, видно, что:
+      С 0:00 по 15:00 активность наименьшая по сравнению  с 16:00 по 24:00
+### Следовательно нерабочее время - 0-15.
 ```{r}
 Sys.setlocale("LC_TIME", "Russian")
 dataset %>%
 select(timestamp, src, dst, bytes) %>%
-mutate(outside_traffic = (!str_detect(src,"^((12|13|14)\\.)")&str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as.POSIXlt(timestamp/1000, origin = "1970-01-01"))) %>%
-filter(outside_traffic == TRUE, hour < 8 | hour > 17) %>%
+mutate(outside_traffic = (str_detect(src,"^((12|13|14)\\.)")&!str_detect(dst,"^((12|13|14)\\.)")), hour = hour(as.POSIXlt(timestamp/1000, origin = "1970-01-01"))) %>%
+filter(outside_traffic == TRUE, hour >=0 & hour <= 15) %>%
 group_by(src) %>%
 summarise(total_bytes = sum(bytes)) %>%
 arrange(desc(total_bytes))  %>%
 head(10)
+
 ```
+# График распределения отправленных пакетов в каждый час
+#group_by(hour) %>%
+#summarise(packets=n()) %>%
+#collect()
+#ggplot(., aes(x=hour,y=packets),) + geom_histogram(stat="identity", color="black",fill="red")
+
